@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package filetransfer;
+
+option go_package = "./internal/filetransfer";
+
+service FileTransfer {
+  rpc UploadFile(stream FileChunk) returns (UploadStatus);
+  rpc DownloadFile(FileRequest) returns (stream FileChunk);
+  rpc ListFiles(DirectoryRequest) returns (FileList);
+}
+
+message FileChunk {
+  string filename = 1;
+  bytes data = 2;
+  int64 chunk_index = 3;
+}
+
+message FileRequest {
+  string filename = 1;
+}
+
+message DirectoryRequest {
+  string directory_path = 1;
+}
+
+message FileList {
+  repeated string files = 1;
+}
+
+message UploadStatus {
+  bool success = 1;
+  string message = 2;
+}
