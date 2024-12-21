@@ -13,7 +13,6 @@
 	<body
 		class="min-h-screen md:h-screen bg-white flex flex-col md:flex-row justify-center p-10 space-y-5 md:space-x-5"
 	>
-		<!-- Drop Area -->
 		<div
 			id="drop-area"
 			class="border-2 border-dashed border-gray-400 rounded-lg w-full p-6 flex items-center justify-center text-center text-gray-700 bg-white shadow-md transition-all"
@@ -43,7 +42,6 @@
 			</form>
 		</div>
 
-		<!-- File List Section -->
 		<div
 			id="file-list-section"
 			class="flex flex-col space-y-3 w-full md:w-1/2 hidden"
@@ -56,7 +54,6 @@
 				Choose recipient
 			</button>
 
-			<!-- File List -->
 			<div
 				id="file-list"
 				class="text-gray-700 overflow-y-auto flex flex-col space-y-3"
@@ -65,7 +62,6 @@
 			</div>
 		</div>
 
-		<!-- Modal -->
 		<div
 			id="recipient-modal"
 			class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-25 hidden"
@@ -73,7 +69,6 @@
 			<div
 				class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative"
 			>
-				<!-- Close Button -->
 				<button
 					class="absolute top-7 right-4 text-gray-600 hover:text-gray-900"
 					onclick="closeModal();"
@@ -104,11 +99,11 @@
 				</ul>
 
 				<div class="flex justify-between space-x-3 mt-6">
-					<!-- Send Files Button (Initially hidden) -->
 					<button
 						id="send-files-btn"
-						class="w-full bg-green-500 text-white py-3 rounded-md hover:bg-green-700 transition-all hidden"
+						class="w-full bg-green-500 text-white py-3 rounded-md hover:bg-green-700 transition-all disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed"
 						onclick="sendFiles()"
+						disabled="true"
 					>
 						Send files
 					</button>

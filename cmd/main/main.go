@@ -18,11 +18,9 @@ type PageData struct {
 }
 
 func main() {
-	// Serve static files (e.g., JS, CSS)
 	http.Handle("/script.js", http.FileServer(http.Dir("static")))
 	http.Handle("/style.css", http.FileServer(http.Dir("static")))
 
-	// Handle root requests
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			handleFileUpload(w, r)
@@ -36,8 +34,6 @@ func main() {
 		log.Fatalf("Failed to start HTTP server: %v", err)
 	}
 }
-
-// serveTemplate parses and serves the index.html template with dynamic data
 func serveTemplate(w http.ResponseWriter, _ *http.Request) {
 	devices, err := networkscanner.RunNetworkScan()
 	if err != nil {
@@ -83,11 +79,9 @@ func handleFileUpload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Redirect back to the main page after successful upload
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// createUploadDirectory ensures the upload directory exists
 func createUploadDirectory(uploadDir string) error {
 	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
 		return os.Mkdir(uploadDir, os.ModePerm)
@@ -95,7 +89,6 @@ func createUploadDirectory(uploadDir string) error {
 	return nil
 }
 
-// saveUploadedFile saves an uploaded file to the specified directory
 func saveUploadedFile(fileHeader *multipart.FileHeader, uploadDir string) error {
 	file, err := fileHeader.Open()
 	if err != nil {

@@ -3,10 +3,10 @@ const fileInput = document.getElementById("file-input");
 const fileListSection = document.getElementById("file-list-section");
 const fileList = document.getElementById("uploaded-files-list");
 const chooseRecipientBtn = document.getElementById("choose-recipient-btn");
-const sendFilesBtn = document.getElementById("send-files-btn"); // The "Send files" button
+const sendFilesBtn = document.getElementById("send-files-btn");
 
 let allFiles = [];
-let selectedRecipient = null; // Track selected recipient
+let selectedRecipient = null;
 
 fileInput.addEventListener("change", (e) => {
 	if (fileInput instanceof HTMLInputElement) {
@@ -103,7 +103,13 @@ function updateFileList(files) {
 			allFiles = allFiles.filter((f) => f.name !== file.name);
 
 			updateFileList(allFiles);
-			fileInput.files = new DataTransfer().files;
+
+			if (fileInput instanceof HTMLInputElement) {
+				const dataTransfer = new DataTransfer();
+
+				allFiles.forEach((file) => dataTransfer.items.add(file));
+				fileInput.files = dataTransfer.files;
+			}
 
 			if (allFiles.length === 0) {
 				chooseRecipientBtn.classList.add("hidden");
@@ -163,13 +169,12 @@ function selectRecipient(event) {
 		!selectedItem.classList.contains("text-blue-600")
 	);
 
-	// Set the selected recipient if the item is selected, or null if deselected
 	if (selectedItem.classList.contains("bg-blue-100")) {
 		selectedRecipient = selectedItem;
-		sendFilesBtn.classList.remove("hidden"); // Show "Send files" button when selected
+		sendFilesBtn.disabled = false;
 	} else {
 		selectedRecipient = null;
-		sendFilesBtn.classList.add("hidden"); // Hide "Send files" button when no recipient is selected
+		sendFilesBtn.disabled = true;
 	}
 }
 
