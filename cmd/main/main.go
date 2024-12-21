@@ -1,16 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
-	"mime/multipart"
+	"net"
 	"net/http"
-	"os"
-	"path/filepath"
 
+	"github.com/jahidxuddin/uni-drop/internal/fileservice"
 	networkscanner "github.com/jahidxuddin/uni-drop/internal/network_scanner"
+	"google.golang.org/grpc"
 )
 
 type PageData struct {
@@ -18,6 +19,8 @@ type PageData struct {
 }
 
 func main() {
+	go startGRPCServer()
+
 	http.Handle("/script.js", http.FileServer(http.Dir("static")))
 	http.Handle("/style.css", http.FileServer(http.Dir("static")))
 
@@ -34,6 +37,77 @@ func main() {
 		log.Fatalf("Failed to start HTTP server: %v", err)
 	}
 }
+
+func startGRPCServer() {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	fileservice.RegisterFileServiceServer(s, &fileservice.Server{})
+
+	log.Println("Starting gRPC server on port 50051")
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+func handleFileUpload(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(10 << 20) // Limit upload size to 10 MB
+	if err != nil {
+		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		return
+	}
+
+	conn, err := grpc.NewClient("localhost:50051", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Failed to connect to gRPC server: %v", err)
+	}
+	defer conn.Close()
+
+	client := fileservice.NewFileServiceClient(conn)
+
+	files := r.MultipartForm.File["file"]
+	if len(files) == 0 {
+		http.Error(w, "No files uploaded", http.StatusBadRequest)
+		return
+	}
+
+	for _, file := range files {
+		fileContent, err := file.Open()
+		if err != nil {
+			http.Error(w, "Unable to open uploaded file", http.StatusInternalServerError)
+			return
+		}
+		defer fileContent.Close()
+
+		contentBytes, err := io.ReadAll(fileContent)
+		if err != nil {
+			http.Error(w, "Unable to read file content", http.StatusInternalServerError)
+			return
+		}
+
+		request := &fileservice.FileRequest{
+			FileName:    file.Filename, 
+			FileContent: contentBytes, 
+		}
+
+		response, err := client.SendFile(context.Background(), request)
+		if err != nil {
+			log.Fatalf("Failed to upload file: %v", err)
+		}
+
+		if response.GetSuccess() {
+			fmt.Println("File uploaded successfully!")
+		} else {
+			fmt.Printf("File upload failed: %s\n", response.GetMessage())
+		}
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func serveTemplate(w http.ResponseWriter, _ *http.Request) {
 	devices, err := networkscanner.RunNetworkScan()
 	if err != nil {
@@ -50,59 +124,4 @@ func serveTemplate(w http.ResponseWriter, _ *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to execute template", http.StatusInternalServerError)
 	}
-}
-
-func handleFileUpload(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(10 << 20) // Limit upload size to 10 MB
-	if err != nil {
-		http.Error(w, "Unable to parse form", http.StatusBadRequest)
-		return
-	}
-
-	files := r.MultipartForm.File["file"]
-	if len(files) == 0 {
-		http.Error(w, "No files uploaded", http.StatusBadRequest)
-		return
-	}
-
-	uploadDir := "uploads"
-	if err := createUploadDirectory(uploadDir); err != nil {
-		http.Error(w, "Unable to create upload directory", http.StatusInternalServerError)
-		return
-	}
-
-	for _, fileHeader := range files {
-		err := saveUploadedFile(fileHeader, uploadDir)
-		if err != nil {
-			http.Error(w, "Unable to save file", http.StatusInternalServerError)
-			return
-		}
-	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func createUploadDirectory(uploadDir string) error {
-	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-		return os.Mkdir(uploadDir, os.ModePerm)
-	}
-	return nil
-}
-
-func saveUploadedFile(fileHeader *multipart.FileHeader, uploadDir string) error {
-	file, err := fileHeader.Open()
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	filePath := filepath.Join(uploadDir, fileHeader.Filename)
-	outFile, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer outFile.Close()
-
-	_, err = io.Copy(outFile, file)
-	return err
 }
