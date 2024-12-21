@@ -2,9 +2,11 @@ const dropArea = document.getElementById("drop-area");
 const fileInput = document.getElementById("file-input");
 const fileListSection = document.getElementById("file-list-section");
 const fileList = document.getElementById("uploaded-files-list");
-const sendFilesBtn = document.getElementById("send-files-btn");
+const chooseRecipientBtn = document.getElementById("choose-recipient-btn");
+const sendFilesBtn = document.getElementById("send-files-btn"); // The "Send files" button
 
 let allFiles = [];
+let selectedRecipient = null; // Track selected recipient
 
 fileInput.addEventListener("change", (e) => {
 	if (fileInput instanceof HTMLInputElement) {
@@ -104,7 +106,7 @@ function updateFileList(files) {
 			fileInput.files = new DataTransfer().files;
 
 			if (allFiles.length === 0) {
-				sendFilesBtn.classList.add("hidden");
+				chooseRecipientBtn.classList.add("hidden");
 			}
 			adjustDropAreaWidth();
 		});
@@ -114,10 +116,10 @@ function updateFileList(files) {
 	});
 
 	if (files.length > 0) {
-		sendFilesBtn.classList.remove("hidden");
+		chooseRecipientBtn.classList.remove("hidden");
 		fileListSection.classList.remove("hidden");
 	} else {
-		sendFilesBtn.classList.add("hidden");
+		chooseRecipientBtn.classList.add("hidden");
 		fileListSection.classList.add("hidden");
 	}
 }
@@ -132,6 +134,46 @@ function adjustDropAreaWidth() {
 	}
 }
 
-function handleSendFiles() {
+function showModal() {
+	document.getElementById("recipient-modal").classList.remove("hidden");
+}
+
+function closeModal() {
+	document.getElementById("recipient-modal").classList.add("hidden");
+}
+
+function selectRecipient(event) {
+	let selectedItem = event.target;
+	if (selectedItem.tagName !== "LI") {
+		selectedItem = selectedItem.closest("li");
+	}
+
+	// Deselect previously selected item if any
+	if (selectedRecipient && selectedRecipient !== selectedItem) {
+		selectedRecipient.classList.remove("bg-blue-100", "text-blue-600");
+	}
+
+	// Toggle selection
+	selectedItem.classList.toggle(
+		"bg-blue-100",
+		!selectedItem.classList.contains("bg-blue-100")
+	);
+	selectedItem.classList.toggle(
+		"text-blue-600",
+		!selectedItem.classList.contains("text-blue-600")
+	);
+
+	// Set the selected recipient if the item is selected, or null if deselected
+	if (selectedItem.classList.contains("bg-blue-100")) {
+		selectedRecipient = selectedItem;
+		sendFilesBtn.classList.remove("hidden"); // Show "Send files" button when selected
+	} else {
+		selectedRecipient = null;
+		sendFilesBtn.classList.add("hidden"); // Hide "Send files" button when no recipient is selected
+	}
+}
+
+function sendFiles() {
 	document.getElementById("file-form").submit();
+	closeModal();
 }

@@ -5,6 +5,12 @@ go 1.22.2
 require google.golang.org/grpc v1.69.0
 
 require (
+	github.com/google/uuid v1.6.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+)
+
+require (
+	github.com/go-ping/ping v1.2.0
 	github.com/golang/protobuf v1.5.4 // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
