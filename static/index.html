@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>UniDrop</title>
+		<script defer src="script.js"></script>
+		<link
+			href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+			rel="stylesheet"
+		/>
+	</head>
+	<body
+		class="min-h-screen md:h-screen bg-white flex flex-col md:flex-row justify-center p-10 space-y-5 md:space-x-5"
+	>
+		<!-- Drop Area -->
+		<div
+			id="drop-area"
+			class="border-2 border-dashed border-gray-400 rounded-lg w-full p-6 flex items-center justify-center text-center text-gray-700 bg-white shadow-md transition-all"
+		>
+			<p>
+				Drag & drop a file here, or
+				<label
+					for="file-input"
+					class="text-blue-500 cursor-pointer hover:text-blue-700"
+					>browse</label
+				>
+			</p>
+			<form
+				action="/"
+				method="post"
+				id="file-form"
+				enctype="multipart/form-data"
+			>
+				<input
+					type="file"
+					id="file-input"
+					name="file"
+					accept="*/*"
+					multiple
+					class="hidden"
+				/>
+			</form>
+		</div>
+
+		<!-- File List Section (Hidden initially) -->
+		<div
+			id="file-list-section"
+			class="flex flex-col space-y-3 w-full md:w-1/2 hidden"
+		>
+			<button
+				id="send-files-btn"
+				class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700 transition-all"
+				onclick="handleSendFiles();"
+			>
+				Send files
+			</button>
+
+			<!-- File List -->
+			<div
+				id="file-list"
+				class="text-gray-700 overflow-y-auto flex flex-col space-y-3"
+			>
+				<ul id="uploaded-files-list" class="list-none p-0 m-0"></ul>
+			</div>
+		</div>
+	</body>
+</html>
