@@ -60,7 +60,7 @@ func handleFileUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := grpc.NewClient("localhost:50051", grpc.WithInsecure())
+	conn, err := grpc.NewClient(r.FormValue("ip") + ":50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Failed to connect to gRPC server: %v", err)
 	}
@@ -89,8 +89,8 @@ func handleFileUpload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		request := &fileservice.FileRequest{
-			FileName:    file.Filename, 
-			FileContent: contentBytes, 
+			FileName:    file.Filename,
+			FileContent: contentBytes,
 		}
 
 		response, err := client.SendFile(context.Background(), request)
@@ -98,9 +98,7 @@ func handleFileUpload(w http.ResponseWriter, r *http.Request) {
 			log.Fatalf("Failed to upload file: %v", err)
 		}
 
-		if response.GetSuccess() {
-			fmt.Println("File uploaded successfully!")
-		} else {
+		if !response.GetSuccess() {
 			fmt.Printf("File upload failed: %s\n", response.GetMessage())
 		}
 	}

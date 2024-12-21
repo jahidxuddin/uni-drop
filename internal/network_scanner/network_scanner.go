@@ -24,7 +24,6 @@ func scanIP(ip string, wg *sync.WaitGroup, results chan<- string) {
 	pinger.Timeout = 1 * time.Second
 	err = pinger.Run()
 	if err != nil {
-		fmt.Printf("Fehler beim Pingen von %s: %v\n", ip, err)
 		return
 	}
 

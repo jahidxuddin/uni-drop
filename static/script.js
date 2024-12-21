@@ -1,5 +1,6 @@
 const dropArea = document.getElementById("drop-area");
 const fileInput = document.getElementById("file-input");
+const ipInput = document.getElementById("ip-input");
 const fileListSection = document.getElementById("file-list-section");
 const fileList = document.getElementById("uploaded-files-list");
 const chooseRecipientBtn = document.getElementById("choose-recipient-btn");
@@ -154,12 +155,10 @@ function selectRecipient(event) {
 		selectedItem = selectedItem.closest("li");
 	}
 
-	// Deselect previously selected item if any
 	if (selectedRecipient && selectedRecipient !== selectedItem) {
 		selectedRecipient.classList.remove("bg-blue-100", "text-blue-600");
 	}
 
-	// Toggle selection
 	selectedItem.classList.toggle(
 		"bg-blue-100",
 		!selectedItem.classList.contains("bg-blue-100")
@@ -172,6 +171,7 @@ function selectRecipient(event) {
 	if (selectedItem.classList.contains("bg-blue-100")) {
 		selectedRecipient = selectedItem;
 		sendFilesBtn.disabled = false;
+		ipInput.value = selectedItem[0].innerText;
 	} else {
 		selectedRecipient = null;
 		sendFilesBtn.disabled = true;
