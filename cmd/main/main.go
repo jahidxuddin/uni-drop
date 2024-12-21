@@ -32,7 +32,6 @@ func main() {
 		}
 	})
 
-	log.Println("Starting web server on port 50000")
 	if err := http.ListenAndServe(":50000", nil); err != nil {
 		log.Fatalf("Failed to start HTTP server: %v", err)
 	}
@@ -47,7 +46,6 @@ func startGRPCServer() {
 	s := grpc.NewServer()
 	fileservice.RegisterFileServiceServer(s, &fileservice.Server{})
 
-	log.Println("Starting gRPC server on port 50051")
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
